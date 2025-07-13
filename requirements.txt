@@ -1,21 +1,22 @@
-# Language & tokenization
-transformers==4.41.1
+# 🤖 Language modeling
+transformers==4.41.2
 tokenizers==0.19.1
 sentencepiece==0.1.99
 
-# Optional core packages
-streamlit
-numpy
-pandas
+# 📊 Core tools
+streamlit==1.35.0
+numpy>=1.22
+pandas>=1.5
 
-# For file handling and parsing
+# 📄 Document parsing
 PyMuPDF
 pdfplumber
 docx
 openpyxl
 
-# For rich tracebacks
+# 📜 Developer UX
 rich
 
+# 🔍 Semantic search and pipelines
 langchain
 faiss-cpu
