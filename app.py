@@ -105,5 +105,5 @@ if uploaded_file:
 # --- Footer ---
 st.markdown("""
 <hr>
-🔧 Built with ❤️ by **Tanushka Verma** | Powered by 🦾 Transformers + Streamlit  
+🔧 Built with ❤️ by Tanushka Verma | Powered by 🦾 Transformers + Streamlit  
 """, unsafe_allow_html=True)
