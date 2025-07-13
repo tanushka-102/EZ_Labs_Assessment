@@ -10,34 +10,16 @@ A simple AI-powered tool to upload research documents, generate summaries, ask q
 ## 📦 Setup Instructions
 
 1. **Clone this repository**  
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
-
-cpp
-Copy
-Edit
 
 2. **Create virtual environment (optional but recommended)**  
 python -m venv venv
 source venv/bin/activate # On Windows: venv\Scripts\activate
 
-markdown
-Copy
-Edit
-
 3. **Install dependencies**  
 pip install -r requirements.txt
 
-markdown
-Copy
-Edit
-
 4. **Run the Streamlit app**  
 streamlit run app.py
-
-yaml
-Copy
-Edit
 
 ---
 
@@ -54,6 +36,8 @@ Edit
 ## 🖼️ Screenshots
 
 Screenshots of the working app are included in the repository to demonstrate the interface and features. These show how the app looks for summary generation, Q&A, and challenge question features.
+![Uploading Screenshot 2025-07-13 230059.png…]()
+
 
 ---
 
@@ -68,10 +52,6 @@ Screenshots of the working app are included in the repository to demonstrate the
 ├── file_utils.py
 ├── summarizer.py
 └── qa.py
-
-yaml
-Copy
-Edit
 
 ---
 
