@@ -1,14 +1,23 @@
+
 import re
 import random
 from transformers import pipeline
 
+# Initialize pipeline once
 qa_pipeline = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
 
 def answer_question(context, question):
-    return qa_pipeline({"context": context, "question": question})
+    try:
+        if not context or not question:
+            return {"answer": "No context or question provided."}
+        return qa_pipeline({"context": context[:4000], "question": question})
+    except Exception as e:
+        return {"answer": f"⚠️ Error: {str(e)}"}
 
 def highlight_snippet(text, answer, context_size=250):
-    answer_text = answer['answer']
+    answer_text = answer.get("answer", "")
+    if not answer_text:
+        return "No snippet found."
     pattern = re.escape(answer_text[:30])
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
@@ -19,5 +28,8 @@ def highlight_snippet(text, answer, context_size=250):
 
 def generate_challenge_questions(text, num_questions=3):
     sentences = re.split(r'(?<=[.!?]) +', text)
-    selected = random.sample(sentences, min(num_questions, len(sentences)))
-    return [f"Explain: '{s.strip()}'" for s in selected if len(s.strip()) > 30]
+    candidates = [s.strip() for s in sentences if len(s.strip()) > 30]
+    if not candidates:
+        return ["⚠️ Not enough valid content for questions."]
+    selected = random.sample(candidates, min(num_questions, len(candidates)))
+    return [f"Explain: '{s}'" for s in selected]
