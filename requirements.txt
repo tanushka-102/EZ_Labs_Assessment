@@ -2,6 +2,7 @@
 transformers==4.41.2
 tokenizers==0.19.1
 sentencepiece==0.1.99
+torch
 
 # 📊 Core tools
 streamlit==1.35.0
