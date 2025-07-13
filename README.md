@@ -36,7 +36,23 @@ streamlit run app.py
 ## 🖼️ Screenshots
 
 Screenshots of the working app are included in the repository to demonstrate the interface and features. These show how the app looks for summary generation, Q&A, and challenge question features.
-![Uploading Screenshot 2025-07-13 230059.png…]()
+### 🚀 Starting Page
+![Starting Page](assets/Starting%20page.png)
+
+### 📄 File Uploaded
+![File Uploaded](assets/file%20uploaded.png)
+
+### 📤 Document Uploaded Successfully
+![Document Uploaded](assets/Document%20uplaoded.png)
+
+### 🎯 Interaction Modes
+![Interaction Modes](assets/Interaction%20modes.png)
+
+### 🧠 Summary Generated
+![Summary Generated](assets/Summary%20generated.png)
+
+### 🎓 Challenge Me Mode
+![Challenge Me](assets/Challenge%20me.png)
 
 
 ---
@@ -48,10 +64,18 @@ Screenshots of the working app are included in the repository to demonstrate the
 ├── requirements.txt
 ├── runtime.txt
 ├── README.md
-└── utils
-├── file_utils.py
-├── summarizer.py
-└── qa.py
+├── utils/
+│   ├── file_utils.py
+│   ├── qa.py
+│   └── summarizer.py
+├── assets/
+│   ├── Starting page.png
+│   ├── file uploaded.png
+│   ├── Document uplaoded.png
+│   ├── Interaction modes.png
+│   ├── Summary generated.png
+│   └── Challenge me.png
+
 
 ---
 
