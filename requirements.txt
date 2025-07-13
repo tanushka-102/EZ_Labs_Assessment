@@ -1,6 +1,22 @@
-python_version == "3.10"
-streamlit==1.35.0
-pdfplumber==0.10.3
-transformers==4.41.2
-torch
-sentencepiece
+# Language & tokenization
+transformers
+sentencepiece==0.1.99
+tokenizers==0.13.3
+
+# Optional core packages
+streamlit
+numpy
+pandas
+
+# For file handling and parsing
+PyMuPDF
+pdfplumber
+docx
+openpyxl
+
+# For rich tracebacks
+rich
+
+# Add only if needed
+langchain
+faiss-cpu
