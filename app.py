@@ -99,13 +99,13 @@ Feedback (with justification):
     )
     return response.choices[0].text.strip()
 
-# Highlight the supporting text from the document
+# Highlight the supporting text from the document using regex
 def find_snippet(text, answer, n_chars=200):
-    match = re.search(re.escape(answer[:50]), text, re.IGNORECASE)
-    if match:
-        start = max(match.start() - n_chars, 0)
-        end = min(match.end() + n_chars, len(text))
-        return text[start:end]
+    sentences = re.split(r'(?<=[.!?]) +', text)
+    pattern = re.escape(answer[:30])
+    for sentence in sentences:
+        if re.search(pattern, sentence, re.IGNORECASE):
+            return sentence.strip()
     return "Snippet not found."
 
 # Streamlit App UI
