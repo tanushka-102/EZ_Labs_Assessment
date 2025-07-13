@@ -17,6 +17,16 @@ st.markdown("Upload a research paper and get summaries, answers, or challenge qu
 uploaded_file = st.file_uploader("Upload your PDF or TXT file", type=["pdf", "txt"])
 
 if uploaded_file:
+    st.success("✅ File uploaded successfully!")
+    st.write(f"**Uploaded File Name:** {uploaded_file.name}")
+    st.write(f"**Uploaded File Type:** {uploaded_file.type}")
+    st.write(f"**Uploaded File Size (bytes):** {uploaded_file.size}")
+
+    text = extract_text(uploaded_file)
+    st.session_state["document_text"] = text
+    st.session_state.setdefault("challenge_responses", {})
+
+if uploaded_file:
     text = extract_text(uploaded_file)
     st.session_state["document_text"] = text
     st.session_state.setdefault("challenge_responses", {})
