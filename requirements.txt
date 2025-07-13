@@ -17,6 +17,5 @@ openpyxl
 # For rich tracebacks
 rich
 
-# Add only if needed
 langchain
 faiss-cpu
