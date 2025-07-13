@@ -1,34 +1,39 @@
-import re
-import random
-from transformers import pipeline
+from io import StringIO
+import pdfplumber
+import logging
 
-# Initialize pipeline once
-qa_pipeline = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
+# Optional: set up logging
+logging.basicConfig(level=logging.INFO)
 
-def answer_question(context, question):
-    try:
-        if not context or not question:
-            return {"answer": "No context or question provided."}
-        return qa_pipeline({"context": context[:4000], "question": question})
-    except Exception as e:
-        return {"answer": f"⚠️ Error: {str(e)}"}
+def extract_text(uploaded_file):
+    if uploaded_file is None:
+        return "❌ No file uploaded."
 
-def highlight_snippet(text, answer, context_size=250):
-    answer_text = answer.get("answer", "")
-    if not answer_text:
-        return "No snippet found."
-    pattern = re.escape(answer_text[:30])
-    match = re.search(pattern, text, re.IGNORECASE)
-    if match:
-        start = max(match.start() - context_size // 2, 0)
-        end = min(match.end() + context_size // 2, len(text))
-        return text[start:end].strip()
-    return "Snippet not found."
+    file_name = uploaded_file.name.lower()
 
-def generate_challenge_questions(text, num_questions=3):
-    sentences = re.split(r'(?<=[.!?]) +', text)
-    candidates = [s.strip() for s in sentences if len(s.strip()) > 30]
-    if not candidates:
-        return ["⚠️ Not enough valid content for questions."]
-    selected = random.sample(candidates, min(num_questions, len(candidates)))
-    return [f"Explain: '{s}'" for s in selected]
+    if file_name.endswith(".pdf"):
+        try:
+            logging.info("📄 Extracting text from PDF...")
+            text = ""
+            with pdfplumber.open(uploaded_file) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+            if not text.strip():
+                return "❌ No text found in PDF."
+            return text.strip()
+        except Exception as e:
+            logging.error(f"PDF extraction error: {e}")
+            return f"❌ Failed to extract PDF text: {e}"
+
+    elif file_name.endswith(".txt"):
+        try:
+            logging.info("📄 Extracting text from TXT...")
+            return uploaded_file.read().decode("utf-8").strip()
+        except Exception as e:
+            logging.error(f"TXT extraction error: {e}")
+            return f"❌ Failed to extract TXT text: {e}"
+
+    else:
+        return "❌ Unsupported file format. Please upload a PDF or TXT file."
