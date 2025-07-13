@@ -28,7 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Title and Description ---
-st.title("🧠 Smart Research Assistant (No API Key Needed)")
+st.title("🧠 Smart Research Assistant")
 with st.spinner("Loading model and preparing UI..."):
     time.sleep(1.5)
 
