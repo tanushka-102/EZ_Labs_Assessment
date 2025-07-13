@@ -7,7 +7,7 @@ from utils.summarizer import summarize_text
 from utils.qa import answer_question, highlight_snippet, generate_challenge_questions
 
 st.set_page_config(page_title="Smart Research Assistant", layout="wide")
-st.title("🧠 Smart Research Assistant (No API Key Needed)")
+st.title("🧠 Smart Research Assistant")
 
 with st.spinner("Loading model and preparing UI..."):
     time.sleep(1.5)
