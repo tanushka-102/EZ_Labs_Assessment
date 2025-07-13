@@ -1,6 +1,7 @@
 import streamlit as st
 import pdfplumber
 import os
+import re
 from transformers import pipeline
 
 # Load pipelines
@@ -33,7 +34,19 @@ def summarize_text(text):
 # QA based on document
 
 def answer_question(context, question):
-    return qa_pipeline({"context": context, "question": question})['answer']
+    return qa_pipeline({"context": context, "question": question})
+
+# Highlight the supporting snippet
+def highlight_snippet(text, answer, context_size=250):
+    answer_text = answer['answer']
+    pattern = re.escape(answer_text[:30])
+    match = re.search(pattern, text, re.IGNORECASE)
+    if match:
+        start = max(match.start() - context_size // 2, 0)
+        end = min(match.end() + context_size // 2, len(text))
+        snippet = text[start:end]
+        return snippet.strip()
+    return "Snippet not found."
 
 # Streamlit UI
 st.set_page_config(page_title="Smart Research Assistant (No API Key)", layout="wide")
@@ -59,4 +72,8 @@ if uploaded_file:
         with st.spinner("Thinking..."):
             answer = answer_question(text, question)
             st.success("Answer:")
-            st.write(answer)
+            st.write(answer['answer'])
+
+            st.markdown("**📍 Relevant Snippet:**")
+            snippet = highlight_snippet(text, answer)
+            st.code(snippet)
