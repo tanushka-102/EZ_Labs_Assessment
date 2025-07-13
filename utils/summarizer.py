@@ -1,6 +1,7 @@
 from transformers import pipeline
 
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# use smaller model that works well on cloud
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 def summarize_text(text):
     chunks = [text[i:i+1024] for i in range(0, len(text), 1024)]
