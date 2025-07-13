@@ -9,8 +9,8 @@ import re
 import requests
 from openai import OpenAI
 
-# Load OpenAI client (v1+ API style)
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else "sk-...")
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 
 # App config
 st.set_page_config(page_title="Smart Research Assistant 🤖", page_icon="📄", layout="wide")
