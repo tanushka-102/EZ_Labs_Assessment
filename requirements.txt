@@ -1,5 +1,5 @@
 streamlit
-openai>=1.1.0
 pdfplumber
-requests
-streamlit-lottie
+transformers
+torch
+sentencepiece
