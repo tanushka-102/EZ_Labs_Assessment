@@ -1,115 +1,63 @@
-"""
-Smart Research Assistant
-Author: Tanushka Verma
-"""
-
 import streamlit as st
 import pdfplumber
 import re
-import requests
 from openai import OpenAI
 
+# Set up OpenAI API client using secrets
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+# Set page config
+st.set_page_config(page_title="📄 Smart Research Assistant", layout="wide")
+st.title("📄 Smart Research Assistant")
+st.markdown(
+    "Upload a research paper or report and get intelligent **summaries**, **question-answering**, and **logic challenges**."
+)
 
-# App config
-st.set_page_config(page_title="Smart Research Assistant 🤖", page_icon="📄", layout="wide")
-
-# Optional: Lottie animation
-def load_lottieurl(url):
-    try:
-        r = requests.get(url)
-        if r.status_code == 200:
-            return r.json()
-    except:
-        return None
-
-try:
-    from streamlit_lottie import st_lottie
-    lottie_ai = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_j1adxtyb.json")
-    with st.sidebar:
-        st_lottie(lottie_ai, height=200)
-except:
-    pass
-
-# Sidebar
-with st.sidebar:
-    st.markdown("## 💡 How to Use")
-    st.markdown("- Upload a PDF or TXT document")
-    st.markdown("- Choose a mode to interact")
-    st.markdown("- Ask questions or take a logic challenge")
-    st.markdown("---")
-    st.markdown("🚀 Built by **Tanushka Verma**")
-
-# Extract text
+# File text extractor
 def extract_text(uploaded_file):
     if uploaded_file.type == "application/pdf":
-        text = ""
         with pdfplumber.open(uploaded_file) as pdf:
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n"
-        return text
+            return "\n".join([page.extract_text() or "" for page in pdf.pages])
     elif uploaded_file.type == "text/plain":
         return uploaded_file.read().decode("utf-8")
-    return "Unsupported file format."
+    return "❌ Unsupported file format."
 
-# Summarize
-def summarize(text):
+# Chat-based call
+def ask_openai(prompt, temperature=0.5, max_tokens=300):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You summarize academic documents clearly."},
-            {"role": "user", "content": f"Summarize this document in under 150 words:\n\n{text[:3000]}"}
-        ],
-        max_tokens=200,
-        temperature=0.5
+        messages=[{"role": "user", "content": prompt}],
+        temperature=temperature,
+        max_tokens=max_tokens
     )
     return response.choices[0].message.content.strip()
 
-# Ask Anything
-def ask_anything(text, question):
-    prompt = f"""
-Answer strictly based on the following document. Provide clear paragraph-based justification.
+# Summarize document
+def summarize(text):
+    prompt = f"Summarize this research document in under 150 words:\n\n{text[:3000]}"
+    return ask_openai(prompt, temperature=0.4, max_tokens=250)
 
+# Answer with justification
+def ask_anything(text, question):
+    prompt = f"""You are an AI assistant. Use only the following document to answer.
 Document:
 {text[:3000]}
 
 User Question:
 {question}
 
-Answer with justification:
-"""
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a research assistant bot."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=300,
-        temperature=0.3
-    )
-    return response.choices[0].message.content.strip()
+Answer (with justification from document):"""
+    return ask_openai(prompt)
 
-# Generate Logic Questions
+# Generate logic-based challenge questions
 def generate_logic_questions(text):
-    prompt = f"Generate 3 logic-based or comprehension questions from this document:\n\n{text[:3000]}"
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a logic professor."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=300,
-        temperature=0.5
-    )
-    return response.choices[0].message.content.strip().split("\n")
+    prompt = f"Generate 3 logic-based or comprehension questions from this academic document:\n\n{text[:3000]}"
+    result = ask_openai(prompt)
+    return [line for line in result.split("\n") if line.strip()]
 
-# Evaluate Answer
-def evaluate_user_answer(text, question, user_answer):
-    prompt = f"""
-Evaluate this user answer based on the document. Give feedback with reasoning.
+# Evaluate user answer
+def evaluate_answer(text, question, user_answer):
+    prompt = f"""Evaluate the following answer using the given document. Justify if it's correct or not.
 
 Document:
 {text[:3000]}
@@ -120,20 +68,10 @@ Question:
 User Answer:
 {user_answer}
 
-Feedback:
-"""
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a research evaluator."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=250,
-        temperature=0.4
-    )
-    return response.choices[0].message.content.strip()
+Feedback with justification:"""
+    return ask_openai(prompt, temperature=0.3)
 
-# Find supporting snippet
+# Snippet finder from answer
 def find_snippet(text, answer):
     sentences = re.split(r'(?<=[.!?]) +', text)
     pattern = re.escape(answer[:30])
@@ -142,59 +80,39 @@ def find_snippet(text, answer):
             return sentence.strip()
     return "Snippet not found."
 
-# Header
-st.markdown("<h1 style='text-align:center;'>📄 Smart Research Assistant</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>Summarize, explore, and test your understanding with AI.</p>", unsafe_allow_html=True)
-st.divider()
+# File uploader
+uploaded_file = st.file_uploader("📤 Upload your PDF or TXT file", type=["pdf", "txt"])
 
-# File Upload
-uploaded_file = st.file_uploader("📤 Upload PDF or TXT Document", type=["pdf", "txt"])
-
+# Main logic
 if uploaded_file:
-    with st.spinner("📖 Reading your document..."):
-        text = extract_text(uploaded_file)
+    text = extract_text(uploaded_file)
     st.session_state["document_text"] = text
 
-    st.subheader("📌 AI-Generated Summary")
-    with st.spinner("🧠 Generating summary..."):
+    st.subheader("🧠 AI-Generated Summary")
+    with st.spinner("Generating summary..."):
         summary = summarize(text)
-    st.success(summary)
+        st.success(summary)
 
-    # Interaction Mode
-    st.markdown("### 🎯 Choose a Mode")
-    mode = st.selectbox("Select:", ["💬 Ask Me Anything", "🧠 Challenge Me (Logic Q&A)"])
-    st.markdown("---")
+    # Mode selector
+    st.subheader("🔧 Choose an Interaction Mode")
+    mode = st.radio("Select:", ["Ask Anything", "Challenge Me"])
 
-    # Ask Anything Mode
-    if mode == "💬 Ask Me Anything":
+    if mode == "Ask Anything":
         question = st.text_input("💬 Ask a question based on the document:")
         if question:
-            with st.spinner("🤖 Generating answer..."):
+            with st.spinner("Thinking..."):
                 answer = ask_anything(text, question)
-            st.markdown("#### 🧑‍🎓 You Asked:")
-            st.code(question)
+                st.markdown(f"**🤖 Answer:** {answer}")
+                snippet = find_snippet(text, answer)
+                st.markdown("**📍 Supporting Snippet from Document:**")
+                st.code(snippet)
 
-            st.markdown("#### 🤖 Assistant Answer")
-            st.info(answer)
-
-            snippet = find_snippet(text, answer)
-            st.markdown("#### 📍 Supporting Snippet")
-            st.code(snippet)
-
-    # Challenge Mode
-    elif mode == "🧠 Challenge Me (Logic Q&A)":
-        if st.button("🎲 Generate Logic Questions"):
-            with st.spinner("🧩 Creating questions..."):
-                questions = generate_logic_questions(text)
-
-            st.markdown("### 📝 Answer these:")
+    elif mode == "Challenge Me":
+        if st.button("🧩 Generate Challenge Questions"):
+            questions = generate_logic_questions(text)
             for i, q in enumerate(questions):
                 st.markdown(f"**Q{i+1}:** {q}")
-                user_input = st.text_input(f"✏️ Your Answer for Q{i+1}", key=f"ans_{i}")
+                user_input = st.text_input(f"📝 Your answer to Q{i+1}:", key=f"ans_{i}")
                 if user_input:
-                    with st.spinner("🔍 Evaluating..."):
-                        feedback = evaluate_user_answer(text, q, user_input)
-                    st.markdown(f"✅ **Feedback:** {feedback}")
-
-# Footer
-st.markdown("<hr><center><small style='color:gray;'>✨ Made with ❤️ by <b>Tanushka Verma</b></small></center>", unsafe_allow_html=True)
+                    feedback = evaluate_answer(text, q, user_input)
+                    st.markdown(f"**✅ Feedback:** {feedback}")
