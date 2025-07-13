@@ -32,11 +32,20 @@ if uploaded_file:
     st.session_state.setdefault("challenge_responses", {})
 
     st.subheader("📌 Document Summary")
-    if st.button("Generate Summary"):
+    if st.button("Generate Summary", key="gen_summary_btn"):
+        st.session_state["generate_summary"] = True
+
+    if st.session_state.get("generate_summary", False):
         with st.spinner("Summarizing document..."):
-            summary = summarize_text(text)
-            st.success("Summary generated:")
-            st.write(summary)
+            try:
+                summary = summarize_text(text[:4000])  # limit to avoid overrun
+                st.success("✅ Summary generated:")
+                st.write(summary)
+            except Exception as e:
+                st.error(f"❌ Error while summarizing: {e}")
+            finally:
+                st.session_state["generate_summary"] = False
+
 
     st.subheader("🧭 Choose Your Interaction Mode")
     mode = st.radio("Select Mode:", ["Ask Anything", "Challenge Me"])
